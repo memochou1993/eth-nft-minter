@@ -8,7 +8,7 @@ const render = async () => {
 };
 
 const mintNFT = async () => {
-  const tokenURI = 'https://github.com/memochou1993/nft-leopard-cat-images/tree/main/output/metadata/';
+  const tokenURI = 'https://raw.githubusercontent.com/memochou1993/nft-leopard-cat-images/main/output/metadata/';
   const res = await contract.mintNFT(tokenURI);
   await res.wait();
   render();
