@@ -5,23 +5,32 @@ const {
   VITE_MORALIS_API_KEY,
 } = import.meta.env;
 
-const request = (url) => {
-  return fetch(url, { headers: { 'X-API-Key': VITE_MORALIS_API_KEY } }).then((r) => r.json());
+const request = (url, method) => {
+  return fetch(url, { method, headers: { 'X-API-Key': VITE_MORALIS_API_KEY } });
 };
 
-const fetchTokens = (account) => {
-  console.log('Fetching...');
+const syncContract = (contract) => {
+  console.log('Syncing contract...');
+  const url = `${VITE_MORALIS_API_URL}/nft/${contract}/sync?chain=goerli`;
+  return request(url, 'PUT');
+};
+
+const fetchTokens = async (account) => {
+  console.log('Fetching tokens...');
   const url = `${VITE_MORALIS_API_URL}/${account}/nft?chain=goerli&token_addresses=${VITE_ERC721_CONTRACT_ADDRESS}&token_addresses=${VITE_ERC1155_CONTRACT_ADDRESS}`;
-  return request(url);
+  const r = await request(url, 'GET');
+  return await r.json();
 };
 
-const resyncToken = (tokenId) => {
-  console.log('Resyncing...');
-  const url = `${VITE_MORALIS_API_URL}/nft/${VITE_ERC721_CONTRACT_ADDRESS}/${tokenId}/metadata/resync?chain=goerli&flag=metadata&mode=sync`;
-  return request(url);
+const resyncToken = async (contract, tokenId) => {
+  console.log('Resyncing token...');
+  const url = `${VITE_MORALIS_API_URL}/nft/${contract}/${tokenId}/metadata/resync?chain=goerli&flag=metadata&mode=sync`;
+  const r = await request(url, 'GET');
+  return await r.json();
 };
 
 export default {
+  syncContract,
   fetchTokens,
   resyncToken,
 };

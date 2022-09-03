@@ -8,10 +8,13 @@ const {
   VITE_ERC1155_CONTRACT_ADDRESS,
 } = import.meta.env;
 
-const mintERC721Button = document.getElementById('mint-erc721');
-const mintERC1155Button = document.getElementById('mint-erc1155');
-const resyncButton = document.getElementById('resync');
+const ERC721SyncButton = document.getElementById('erc721-sync');
+const ERC721MintButton = document.getElementById('erc721-mint');
+const ERC721ResyncButton = document.getElementById('erc721-resync');
 const ERC721List = document.getElementById('erc721-list');
+const ERC1155SyncButton = document.getElementById('erc1155-sync');
+const ERC1155MintButton = document.getElementById('erc1155-mint');
+const ERC1155ResyncButton = document.getElementById('erc1155-resync');
 const ERC1155List = document.getElementById('erc1155-list');
 
 class App {
@@ -34,9 +37,12 @@ class App {
     setInterval(() => this.renderTokens(ERC721List, 'ERC721'), 1000 * 10);
     setInterval(() => this.renderTokens(ERC1155List, 'ERC1155'), 1000 * 10);
   
-    mintERC721Button.addEventListener('click', () => this.mintToken(this.ERC721Contract));
-    mintERC1155Button.addEventListener('click', () => this.mintToken(this.ERC1155Contract));
-    resyncButton.addEventListener('click', () => this.resyncTokens());
+    ERC721SyncButton.addEventListener('click', () => this.syncContract(VITE_ERC721_CONTRACT_ADDRESS));
+    ERC721MintButton.addEventListener('click', () => this.mintToken(this.ERC721Contract));
+    ERC721ResyncButton.addEventListener('click', () => this.resyncTokens(VITE_ERC721_CONTRACT_ADDRESS, 'ERC721'));
+    ERC1155SyncButton.addEventListener('click', () => this.syncContract(VITE_ERC1155_CONTRACT_ADDRESS));
+    ERC1155MintButton.addEventListener('click', () => this.mintToken(this.ERC1155Contract));
+    ERC1155ResyncButton.addEventListener('click', () => this.resyncTokens(VITE_ERC1155_CONTRACT_ADDRESS, 'ERC1155'));
     document.body.removeAttribute('hidden');
   }
 
@@ -44,7 +50,11 @@ class App {
     const tokenURI = 'https://raw.githubusercontent.com/memochou1993/nft-leopard-cat-images/main/output/metadata/';
     const res = await contract.mintNFT(tokenURI);
     await res.wait();
-  };
+  }
+
+  async syncContract(account) {
+    await api.syncContract(account);
+  }
 
   async fetchTokens(account) {
     const { result } = await api.fetchTokens(account);
@@ -65,13 +75,14 @@ class App {
         img.src = image;
         list.appendChild(img);
       });
-  };
+  }
 
-  async resyncTokens() {
+  async resyncTokens(contract, type) {
     if (!this.tokens) return;
     this.tokens
       .filter((t) => !t.metadata)
-      .forEach((t) => api.resyncToken(t.token_id));
+      .filter((t) => t.contract_type === type)
+      .forEach((t) => api.resyncToken(contract, t.token_id));
   }
 }
 
